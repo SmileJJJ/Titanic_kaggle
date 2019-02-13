@@ -38,33 +38,70 @@ __mtime__ = 'None'
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from pylab import mpl
+
+mpl.rcParams['font.sans-serif'] = ['FangSong'] #指定默认字体
+mpl.rcParams['axes.unicode_minus'] = False
 
 data_train = pd.read_csv('DATASET/train.csv')
 
 # data_train.info()
 
-fig = plt.figure()
-fig.set(alpha=0.2)
-
-plt.subplot2grid((2,3),(0,0))             # 在一张大图里分列几个小图
-print(data_train.Survived.value_counts())
+fig1 = plt.figure(1)
+fig1.set(alpha=0.2)
+plt.subplot2grid((3,2),(0,0))             # 在一张大图里分列几个小图
 data_train.Survived.value_counts().plot(kind='bar')     # 柱状图
-plt.title(u"rescued situation")
-plt.ylabel(u"people")
+plt.title(u"获救情况")
+plt.ylabel(u"人数")
 
-plt.subplot2grid((2,3),(0,1))             # 在一张大图里分列几个小图
-print(data_train.Pclass.value_counts())
+plt.subplot2grid((3,2),(0,1))             # 在一张大图里分列几个小图
 data_train.Pclass.value_counts().plot(kind='bar')     # 柱状图
-plt.title(u"Pclass")
-plt.ylabel(u"people")
+plt.title(u"舱位等级情况")
+plt.ylabel(u"人数")
 
-plt.subplot2grid((2,3),(0,2))
+plt.subplot2grid((3,2),(2,1))
 plt.scatter(data_train.Survived, data_train.Age)
 plt.ylabel(u"年龄")                         # 设定纵坐标名称
 plt.grid(b=True, which='major', axis='y')
 plt.title(u"按年龄看获救分布 (1为获救)")
 
+plt.subplot2grid((3,1),(1,0))
+data_train.Age[data_train.Pclass == 1].plot(kind='kde')
+data_train.Age[data_train.Pclass == 2].plot(kind='kde')
+data_train.Age[data_train.Pclass == 3].plot(kind='kde')
+plt.ylabel(u'密度')
+plt.title(u'各年龄段舱位等级情况')
+plt.legend(('头等舱', '二等舱', '三等舱'), loc='best')
+
+plt.subplot2grid((3,2),(2,0))
+data_train.Embarked.value_counts().plot(kind='bar')
+plt.ylabel(u'人数')
+plt.xlabel(u'港口')
+plt.title(u'登船港口情况')
+
+fig2 = plt.figure(2)
+fig2.set(alpha=0.2)
+survived0 = data_train.Pclass[data_train.Survived == 0].value_counts()
+survived1 = data_train.Pclass[data_train.Survived == 1].value_counts()
+df = pd.DataFrame({'获救': survived1, '未获救': survived0})
+df.plot(kind='bar', stacked=True)
+plt.ylabel(u'人数')
+plt.xlabel(u'乘客等级')
+plt.title(u'各等级存活情况')
+
+fig3 = plt.figure(3)
+fig3.set(alpha=0.2)
+survived0 = data_train.Sex[data_train.Survived == 0].value_counts()
+survived1 = data_train.Sex[data_train.Survived == 1].value_counts()
+df = pd.DataFrame({'获救': survived1, '未获救': survived0})
+df.plot(kind='bar', stacked=True)
+plt.ylabel(u'人数')
+plt.xlabel(u'性别')
+plt.title(u'男性女性存活情况')
+
+
 plt.show()
+
 
 
 ''' 
