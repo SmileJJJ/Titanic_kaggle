@@ -36,77 +36,42 @@ __mtime__ = 'None'
 """
 
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from pylab import mpl
 
-mpl.rcParams['font.sans-serif'] = ['FangSong'] #指定默认字体
-mpl.rcParams['axes.unicode_minus'] = False
-
+# 数据预处理一 : 补充缺失值
+# 缺失：Age  Cabin  Embarked
 data_train = pd.read_csv('DATASET/train.csv')
 
-# data_train.info()
+data_train['Age'].fillna(int(data_train['Age'].mean()),inplace=True)
 
-fig1 = plt.figure(1)
-fig1.set(alpha=0.2)
-plt.subplot2grid((3,2),(0,0))             # 在一张大图里分列几个小图
-data_train.Survived.value_counts().plot(kind='bar')     # 柱状图
-plt.title(u"获救情况")
-plt.ylabel(u"人数")
+data_train.loc[(data_train['Cabin'].notnull()), 'Cabin'] = 'YES'
+data_train.loc[(data_train['Cabin'].isnull()), 'Cabin'] = 'NO'
 
-plt.subplot2grid((3,2),(0,1))             # 在一张大图里分列几个小图
-data_train.Pclass.value_counts().plot(kind='bar')     # 柱状图
-plt.title(u"舱位等级情况")
-plt.ylabel(u"人数")
+data_train['Embarked'].fillna('S',inplace=True)
 
-plt.subplot2grid((3,2),(2,1))
-plt.scatter(data_train.Survived, data_train.Age)
-plt.ylabel(u"年龄")                         # 设定纵坐标名称
-plt.grid(b=True, which='major', axis='y')
-plt.title(u"按年龄看获救分布 (1为获救)")
+# print(data_train.info())
 
-plt.subplot2grid((3,1),(1,0))
-data_train.Age[data_train.Pclass == 1].plot(kind='kde')
-data_train.Age[data_train.Pclass == 2].plot(kind='kde')
-data_train.Age[data_train.Pclass == 3].plot(kind='kde')
-plt.ylabel(u'密度')
-plt.title(u'各年龄段舱位等级情况')
-plt.legend(('头等舱', '二等舱', '三等舱'), loc='best')
+# 数据预处理二 : 数据one-hot处理(哑变量处理类别数据)
+dummies_Cabin = pd.get_dummies(data_train['Cabin'], prefix='Cabin')
+dummies_Sex = pd.get_dummies(data_train['Sex'], prefix='Sex')
+dummies_Embarked = pd.get_dummies(data_train['Embarked'], prefix='Embarked')
+dummies_Pclass = pd.get_dummies(data_train['Pclass'], prefix='Pclass')
 
-plt.subplot2grid((3,2),(2,0))
-data_train.Embarked.value_counts().plot(kind='bar')
-plt.ylabel(u'人数')
-plt.xlabel(u'港口')
-plt.title(u'登船港口情况')
+df = pd.concat([data_train, dummies_Cabin, dummies_Sex, dummies_Embarked, dummies_Pclass], axis=1)
+df.drop(['Cabin', 'Sex', 'Embarked', 'Pclass'], axis=1, inplace=True)
 
-fig2 = plt.figure(2)
-fig2.set(alpha=0.2)
-survived0 = data_train.Pclass[data_train.Survived == 0].value_counts()
-survived1 = data_train.Pclass[data_train.Survived == 1].value_counts()
-df = pd.DataFrame({'获救': survived1, '未获救': survived0})
-df.plot(kind='bar', stacked=True)
-plt.ylabel(u'人数')
-plt.xlabel(u'乘客等级')
-plt.title(u'各等级存活情况')
-
-fig3 = plt.figure(3)
-fig3.set(alpha=0.2)
-survived0 = data_train.Sex[data_train.Survived == 0].value_counts()
-survived1 = data_train.Sex[data_train.Survived == 1].value_counts()
-df = pd.DataFrame({'获救': survived1, '未获救': survived0})
-df.plot(kind='bar', stacked=True)
-plt.ylabel(u'人数')
-plt.xlabel(u'性别')
-plt.title(u'男性女性存活情况')
+# 数据预处理三 : 数据数据标准差处理
 
 
-plt.show()
+print(df.info())
 
 
 
-''' 
+
+
+
+'''
 训练集数据信息
-RangeIndex: 891 entries, 0 to 890
+RangeIndex: 891 entries, 0 to 890 
 Data columns (total 12 columns):
 PassengerId    891 non-null int64
 Survived       891 non-null int64
@@ -123,7 +88,3 @@ Embarked       889 non-null object
 dtypes: float64(2), int64(5), object(5)
 memory usage: 83.6+ KB
 '''
-
-
-
-
